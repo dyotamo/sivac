@@ -4,6 +4,6 @@ from wtforms.validators import DataRequired
 
 
 class LoginForm(FlaskForm):
-    institution = SelectField('Institution', choices=[
-                              ("UZ", "UZ"), ("UEM", "UEM"), ("UP", "UP")])
+    institution = SelectField('Institution', choices=[(
+        "Universidade Zambeze", "Universidade Zambeze")])
     password = PasswordField('Password', validators=[DataRequired()])

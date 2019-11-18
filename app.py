@@ -1,7 +1,7 @@
 from flask import Flask, render_template, redirect, flash, jsonify, url_for
 from flask_sqlalchemy import SQLAlchemy
-from forms import SearchForm, LoginForm
-from flask_login import LoginManager, UserMixin, login_required, login_user, logout_user
+from forms import SearchForm, LoginForm, UploadForm
+from flask_login import LoginManager, UserMixin, login_required, login_user, logout_user, current_user
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "make-this-key-powerfull"
@@ -23,13 +23,10 @@ class Certificate(db.Model):
         return "<Certificate %d>" % self.id
 
 
-class User(db.Model):
+class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     institution = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(255), unique=False, nullable=False)
-    is_authenticated = db.Column(db.Boolean(255), unique=False, nullable=False)
-    is_active = db.Column(db.Boolean(255), unique=False, nullable=False)
-    is_anonymous = db.Column(db.Boolean(255), unique=False, nullable=False)
 
     def __repr__(self):
         return "<Institution %d>" % self.institution
@@ -50,8 +47,26 @@ def index():
             flash("Invalid certificate.", "danger")
         else:
             flash("Valid certificate.", "success")
-        return redirect("/")
+        return redirect(url_for("index"))
     return render_template("index.html", form=form)
+
+
+@app.route("/portal", methods=["GET", "POST"])
+@login_required
+def portal():
+    form = UploadForm()
+
+    if form.validate_on_submit():
+        from seed import import_csv
+
+        print(dir(form.csv.data))
+        item_count = import_csv(form.csv.data)
+        flash("{} lines sucessfully loaded".format(item_count), "success")
+        return redirect(url_for('index'))
+
+    certificates = Certificate.query.filter_by(
+        institution=current_user.institution)
+    return render_template("portal.html", certificates=certificates, form=form)
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -67,10 +82,10 @@ def login():
         if user is None:
             flash("Invalid credentials.", "danger")
         else:
-            flash("Successful login as {}.".format(
+            flash("Successful logged in as {}.".format(
                 user.institution), "success")
             login_user(user)
-        return redirect(url_for("login"))
+        return redirect(url_for("portal"))
     return render_template("login.html", form=form)
 
 
@@ -78,13 +93,13 @@ def login():
 @login_required
 def logout():
     logout_user()
-    flash("Successful logout.", "success")
+    flash("Successful logged out.", "success")
     return redirect(url_for("index"))
 
 
 @login_manager.user_loader
 def load_user(user_id):
-    return User.get(user_id)
+    return User.query.get(user_id)
 
 
 @app.errorhandler(404)
