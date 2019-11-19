@@ -7,7 +7,7 @@
     </div>
     <div class="col-md-8">
 
-        <form method="POST" action="{{ url_for('portal') }}" class="col-md-6 form-inline" enctype="multipart/form-data">
+        <form method="POST" action="{{ url_for('portal') }}" class="form-inline" enctype="multipart/form-data">
             {{ form.csrf_token }}
             <div class="form-group">
                 {{ render_field(form.csv, class="form-control-file") }}
@@ -17,6 +17,8 @@
             </div>
         </form>
 
+        <hr />
+
         {% if certificates %}
         <table class="table table-borderless">
             <thead>
@@ -24,7 +26,7 @@
                     <th scope="col">Code</th>
                     <th scope="col">Owner</th>
                     <th scope="col">Issue Date</th>
-                    <th scope="col" colspan="2">Actions</th>
+                    <th scope="col">Action</th>
                 </tr>
             </thead>
             <tbody>
@@ -33,8 +35,35 @@
                     <td>{{ certificate.code }}</td>
                     <td>{{ certificate.owner }}</td>
                     <td>{{ certificate.issue_date.strftime("%d/%m/%Y") }}</td>
-                    <td><a href="" class="btn btn-primary">Edit</a></td>
-                    <td><a href="" class="btn btn-danger">Delete</a></td>
+                    <td>
+                        <button type="button" class="btn btn-danger" data-toggle="modal"
+                            data-target="#modal{{ loop.index }}">
+                            Delete
+                        </button>
+                        <div class="modal fade" id="modal{{ loop.index }}" tabindex="-1" role="dialog"
+                            aria-labelledby="modal{{ loop.index }}label" aria-hidden="true">
+                            <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="modal{{ loop.index }}label">Confirm</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        Are you sure you want to remove {{ certificate.owner }} certificate?
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary"
+                                            data-dismiss="modal">Close</button>
+                                        <form method="POST" action="{{ url_for('remove', id=certificate.id) }}">
+                                            <button type="submit" class="btn btn-danger">Yes</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>
