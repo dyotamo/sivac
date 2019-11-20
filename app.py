@@ -15,7 +15,7 @@ app.config["SECRET_KEY"] = "make-this-key-powerfull"
 
 db = SQLAlchemy(app)
 app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get(
-    "DATA_BASE_URL") or "sqlite:///dev.db"
+    "DATABASE_URL") or "sqlite:///dev.db"
 
 login_manager = LoginManager(app)
 
