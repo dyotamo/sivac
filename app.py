@@ -8,7 +8,7 @@ from flask_sqlalchemy import SQLAlchemy
 from forms import SearchForm, LoginForm, UploadForm
 from flask_login import LoginManager, UserMixin, login_required, login_user, logout_user, current_user
 from werkzeug.utils import secure_filename
-from werkzeug.security import generate_password_hash
+from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "make-this-key-powerfull"
@@ -65,7 +65,7 @@ def index():
 @app.route("/portal", methods=["GET", "POST"])
 @login_required
 def portal():
-    """ Show all certificates that belongs to certain institution, 
+    """ Show all certificates that belongs to certain institution,
     and also makes possible to upload a .csv file containg new certificates """
     form = UploadForm()
     if form.validate_on_submit():
@@ -100,7 +100,7 @@ def remove(id):
 
 
 def _save_csv(form):
-    """ An utility function to save a file in the /tmp directory, 
+    """ An utility function to save a file in the /tmp directory,
     returning its path for further processing """
     csv = form.csv.data
     path = os.path.join(tempfile.gettempdir(),
@@ -117,16 +117,18 @@ def login():
         institution = form.institution.data
         password = form.password.data
 
-        user = User.query.filter_by(
-            institution=institution, password=generate_password_hash(password)).first()
+        user = User.query.filter_by(institution=institution).first()
 
         if user is None:
             flash("Invalid credentials.", "danger")
         else:
-            login_user(user)
-            flash("Successful logged in as {}.".format(
-                user.institution), "success")
-            return redirect(url_for("portal"))
+            if check_password_hash(user.password, password):
+                login_user(user)
+                flash("Successful logged in as {}.".format(
+                    user.institution), "success")
+                return redirect(url_for("portal"))
+            else:
+                flash("Invalid credentials.", "danger")
     return render_template("login.html", form=form)
 
 
@@ -148,7 +150,7 @@ def load_user(user_id):
 # HTTP Errors views
 @app.errorhandler(500)
 def internal_server_error(e):
-    return jsonify("404 Internal Server Error.")
+    return jsonify("500 Internal Server Error.")
 
 
 @app.errorhandler(404)
