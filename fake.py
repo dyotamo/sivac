@@ -3,12 +3,11 @@ import app
 from random import randint
 from datetime import datetime
 from faker import Faker
+from forms.search import CHOICES
 
 fake = Faker()
 
-INSTITUTIONS = ["Universidade Zambeze"]
-
-for institution in INSTITUTIONS:
+for _, institution in CHOICES:
     for _ in range(10):
         certificate = app.Certificate(code=fake.isbn13(separator="-"), owner=fake.name(), issue_date=datetime.strptime(
             fake.date(pattern="%d/%m/%Y", end_datetime=None), "%d/%m/%Y"), institution=institution)
