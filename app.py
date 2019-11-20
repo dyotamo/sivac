@@ -5,7 +5,7 @@ import tempfile
 from datetime import datetime
 from flask import Flask, render_template, redirect, flash, jsonify, url_for
 from flask_sqlalchemy import SQLAlchemy
-from forms import SearchForm, LoginForm, UploadForm
+from forms import SearchForm, LoginForm, UploadForm, PasswordChangeForm
 from flask_login import LoginManager, UserMixin, login_required, login_user, logout_user, current_user
 from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -130,6 +130,30 @@ def login():
             else:
                 flash("Invalid credentials.", "danger")
     return render_template("login.html", form=form)
+
+
+@app.route("/password", methods=["GET", "POST"])
+def password():
+    """ Change password view """
+    error = None
+    form = PasswordChangeForm()
+    if form.validate_on_submit():
+        current_password = form.current_password.data
+        new_password = form.new_password.data
+        confirm_new_password = form.confirm_new_password.data
+
+        if check_password_hash(current_user.password, current_password):
+            if new_password == confirm_new_password:
+                current_user.password = generate_password_hash(new_password)
+                db.session.add(current_user)
+                db.session.commit()
+                flash("Password changed successfully", "success")
+                return redirect("portal")
+            else:
+                error = "Password confirmation failed"
+        else:
+            error = "Current password failed"
+    return render_template("password.html", form=form, error=error)
 
 
 @app.route("/logout", methods=["GET"])
