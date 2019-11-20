@@ -158,6 +158,11 @@ def page_not_found(e):
     return jsonify("404 Not Found.")
 
 
+@app.errorhandler(405)
+def page_not_found(e):
+    return jsonify("405 Method Not Allowed.")
+
+
 @app.errorhandler(401)
 def unauthorized(e):
     flash("Login first", "warning")
