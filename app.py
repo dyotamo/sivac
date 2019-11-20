@@ -8,6 +8,7 @@ from flask_sqlalchemy import SQLAlchemy
 from forms import SearchForm, LoginForm, UploadForm
 from flask_login import LoginManager, UserMixin, login_required, login_user, logout_user, current_user
 from werkzeug.utils import secure_filename
+from werkzeug.security import generate_password_hash
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "make-this-key-powerfull"
@@ -117,7 +118,7 @@ def login():
         password = form.password.data
 
         user = User.query.filter_by(
-            institution=institution, password=password).first()
+            institution=institution, password=generate_password_hash(password)).first()
 
         if user is None:
             flash("Invalid credentials.", "danger")
