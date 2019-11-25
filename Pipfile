@@ -6,6 +6,7 @@ verify_ssl = true
 [dev-packages]
 autopep8 = "*"
 rope = "*"
+faker = "*"
 
 [packages]
 flask = "*"
@@ -13,9 +14,8 @@ gunicorn = "*"
 flask-wtf = "*"
 flask-sqlalchemy = "*"
 flask-login = "*"
-faker = "*"
 psycopg2 = "*"
-flask-babel = "*"
+flask-minify = "*"
 
 [requires]
 python_version = "3.6"

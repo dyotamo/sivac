@@ -9,18 +9,19 @@ from forms import SearchForm, LoginForm, UploadForm, PasswordChangeForm
 from flask_login import LoginManager, UserMixin, login_required, login_user, logout_user, current_user
 from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask_babel import Babel, _
+from flask_minify import minify
 
 app = Flask(__name__)
 db = SQLAlchemy(app)
-babel = Babel(app)
+minify(app)
 
 login_manager = LoginManager(app)
 login_manager.login_view = "login"
-login_manager.login_message = _("Please log in to access this page.")
+login_manager.login_message = "Para aceder a esta funcionalidade, deve em primeiro lugar autenticar-se."
 login_manager.login_message_category = "warning"
 
 app.config.from_object("config.BaseConfig")
+
 
 class Certificate(db.Model):
     """ Certificate model """
@@ -58,10 +59,10 @@ def index():
             issue_date.year, issue_date.month, issue_date.day), institution=institution).first()
 
         if certificate is None:
-            error = _("Invalid certificate.")
+            error = "Certificado inválido."
         else:
-            flash(_("Certificate with code {} is valid, belongs to {}, issued on {}.").format(
-                certificate.code, certificate.owner, certificate.issue_date.strftime("%d-%m-%Y")), "success")
+            flash("Certificado com o código {} é válido, do titular {}, emitido em {}.".format(
+                certificate.code, certificate.owner, certificate.issue_date.strftime("%d/%m/%Y")), "success")
             return redirect(url_for("index"))
     return render_template("index.html", form=form, error=error)
 
@@ -81,13 +82,13 @@ def portal():
         loaded_count, ignored_count = import_csv(f)
         f.close()
 
-        flash(_("{} line(s) sucessfully loaded, {} line(s) ignored.").format(
+        flash("{} linha(s) carregada(s) com sucesso, {} linha(s) ignorada(s).".format(
             loaded_count, ignored_count), "success")
 
         return redirect(url_for("portal"))
 
-    return render_template("portal.html", certificates=Certificate.query.filter_by
-                           (institution=current_user.institution), form=form)
+    return render_template("portal.html", page=Certificate.query.filter_by
+                           (institution=current_user.institution).paginate(per_page=9), form=form)
 
 
 @app.route("/delete/<int:id>", methods=["POST"])
@@ -98,7 +99,7 @@ def remove(id):
     db.session.delete(certificate)
     db.session.commit()
 
-    flash(_("{}'s certificated removed successfully.").format(
+    flash("Certificado de {} removido com sucesso.".format(
         certificate.owner), "success")
     return redirect(url_for("portal"))
 
@@ -124,18 +125,18 @@ def login():
         user = User.query.filter_by(institution=institution).first()
 
         if user is None:
-            flash(_("Invalid credentials."), "danger")
+            flash("Credenciais inválidas.", "danger")
         else:
             if check_password_hash(user.password, password):
                 login_user(user)
-                flash(_("Successful logged in as {}.").format(
+                flash("Entrou como {}.".format(
                     user.institution), "success")
-                
+
                 forward = request.get_data()
                 print(forward)
                 return redirect(url_for("portal"))
             else:
-                flash(_("Invalid credentials."), "danger")
+                flash("Credenciais inválidas.", "danger")
     return render_template("login.html", form=form)
 
 
@@ -155,12 +156,12 @@ def password():
                 current_user.password = generate_password_hash(new_password)
                 db.session.add(current_user)
                 db.session.commit()
-                flash(_("Password changed successfully"), "success")
+                flash("Password alterado com sucesso.", "success")
                 return redirect(url_for("portal"))
             else:
-                error = _("Password confirmation failed")
+                error = "Confirmação de password falhou."
         else:
-            error = _("Current password failed")
+            error = "Password corrente errado."
     return render_template("password.html", form=form, error=error)
 
 
@@ -169,7 +170,7 @@ def password():
 def logout():
     """ Get out here """
     logout_user()
-    flash(_("Successful logged out."), "success")
+    flash("Saiu com sucesso.", "success")
     return redirect(url_for("index"))
 
 

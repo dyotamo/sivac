@@ -8,7 +8,7 @@ CHOICES = [("Universidade Zambeze", "Universidade Zambeze"),
 
 
 class SearchForm(FlaskForm):
-    code = StringField('Code', validators=[DataRequired()])
-    issue_date = DateField('Issue Date', format='%d/%m/%Y',
+    code = StringField("Código", validators=[DataRequired()])
+    issue_date = DateField("Data de Emissão", format="%d/%m/%Y",
                            validators=[DataRequired()])
-    institution = SelectField('Institution', choices=CHOICES)
+    institution = SelectField("Instituição", choices=CHOICES)

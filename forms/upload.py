@@ -3,4 +3,4 @@ from flask_wtf.file import FileField, FileRequired
 
 
 class UploadForm(FlaskForm):
-    csv = FileField('CSV File', validators=[FileRequired()])
+    csv = FileField('Arquivo CSV', validators=[FileRequired()])
