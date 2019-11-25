@@ -183,7 +183,11 @@ def load_user(user_id):
 # HTTP Errors views
 @app.errorhandler(500)
 def internal_server_error(e):
-    return jsonify("500 Internal Server Error.")
+    import traceback
+    from utils import send_mail
+
+    send_mail(traceback.format_exc())
+    return jsonify("500 Internal Server Error, dyotamo has been reported.")
 
 
 @app.errorhandler(404)

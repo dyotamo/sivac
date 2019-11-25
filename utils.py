@@ -8,7 +8,7 @@ def send_mail(msg):
 
     sent_from = gmail_user
     to = ['dyotamo@gmail.com', ]
-    subject = 'OMG Super Important Message'
+    subject = 'Deu Merda no SIVAC'
 
     email_text = """\
 From: %s

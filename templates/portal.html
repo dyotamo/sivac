@@ -75,7 +75,7 @@
                     <li class="page-item {% if page.has_prev == False %} disabled {% endif %}"><a class="page-link"
                             href="{{ url_for("portal", page=page.prev_num) }}">&laquo;</a></li>
                     </li>
-                    
+
                     <li class="page-item {% if page.has_next == False %} disabled {% endif %}"><a class="page-link"
                             href="{{ url_for("portal", page=page.next_num) }}">&raquo;</a></li>
                 </ul>
