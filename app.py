@@ -46,6 +46,7 @@ class User(db.Model, UserMixin):
 def index():
     """ Presentes a certificate validation form and validates certificates """
     form = SearchForm()
+    error = None
     if form.validate_on_submit():
         code = form.code.data
         issue_date = form.issue_date.data
@@ -55,11 +56,12 @@ def index():
             issue_date.year, issue_date.month, issue_date.day), institution=institution).first()
 
         if certificate is None:
-            flash("Invalid certificate.", "danger")
+            error = "Invalid certificate."
         else:
-            flash("Valid certificate.", "success")
-        return redirect(url_for("index"))
-    return render_template("index.html", form=form)
+            flash("Certificate with code {} is valid, belongs to {}, issued on {}.".format(
+                certificate.code, certificate.owner, certificate.issue_date.strftime('%d-%m-%Y')), "success")
+            return redirect(url_for("index"))
+    return render_template("index.html", form=form, error=error)
 
 
 @app.route("/portal", methods=["GET", "POST"])
@@ -148,7 +150,7 @@ def password():
                 db.session.add(current_user)
                 db.session.commit()
                 flash("Password changed successfully", "success")
-                return redirect("portal")
+                return redirect(url_for("portal"))
             else:
                 error = "Password confirmation failed"
         else:
@@ -190,7 +192,7 @@ def page_not_found(e):
 @app.errorhandler(401)
 def unauthorized(e):
     flash("Login first", "warning")
-    return redirect("login")
+    return redirect(url_for("login"))
 
 
 if __name__ == "__main__":

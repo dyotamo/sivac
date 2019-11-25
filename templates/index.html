@@ -6,12 +6,19 @@
     <div class="col-md-3">
     </div>
     <form method="POST" action="{{ url_for('index') }}" class="col-md-6">
+        {% if error %}
+        <div class="alert alert-danger">
+            {{ error }}
+        </div>
+        {% endif %}
         {{ form.csrf_token }}
         <div class="form-group">
-            {{ render_field(form.code, class="form-control", value=form.code.data if form.code.data != None) }}
+            {{ render_field(form.code, class="form-control" ,
+                value=form.code.data if form.code.data != None) }}
         </div>
         <div class="form-group">
-            {{ render_field(form.issue_date, class="form-control", placeholder="Ex: 31/09/2015") }}
+            {{ render_field(form.issue_date, class="form-control",  placeholder="Ex: 31/09/2015" ,
+                value=form.issue_date.data if form.issue_date.data != None) }}
         </div>
         <div class="form-group">
             {{ render_field(form.institution, class="form-control") }}
