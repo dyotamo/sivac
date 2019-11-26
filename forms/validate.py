@@ -7,7 +7,7 @@ CHOICES = [("Universidade Zambeze", "Universidade Zambeze"),
            ("Universidade Pedagógica", "Universidade Pedagógica")]
 
 
-class SearchForm(FlaskForm):
+class ValidateForm(FlaskForm):
     code = StringField("Código", validators=[DataRequired()])
     issue_date = DateField("Data de Emissão", format="%d/%m/%Y",
                            validators=[DataRequired()])

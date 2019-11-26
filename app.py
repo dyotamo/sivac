@@ -5,9 +5,8 @@ import tempfile
 from datetime import datetime
 from flask import Flask, render_template, redirect, flash, jsonify, url_for, request
 from flask_sqlalchemy import SQLAlchemy
-from forms import SearchForm, LoginForm, UploadForm, PasswordChangeForm
+from forms import ValidateForm, LoginForm, UploadForm, PasswordChangeForm
 from flask_login import LoginManager, UserMixin, login_required, login_user, logout_user, current_user
-from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_minify import minify
 
@@ -48,7 +47,7 @@ class User(db.Model, UserMixin):
 @app.route("/", methods=["GET", "POST"])
 def index():
     """ Presentes a certificate validation form and validates certificates """
-    form = SearchForm()
+    form = ValidateForm()
     error = None
     if form.validate_on_submit():
         code = form.code.data
@@ -75,18 +74,14 @@ def portal():
     form = UploadForm()
     if form.validate_on_submit():
         from seed import import_csv
+        from tools.file import save_csv
 
-        # Here, we save the file in the /tmp directory and then retrieve it for reading
-        path = _save_csv(form)
-        f = open(path, "r")
-        loaded_count, ignored_count = import_csv(f)
-        f.close()
+        path = save_csv(form)
+        with open(path, "r") as f:
+            import_csv(f)
 
-        flash("{} linha(s) carregada(s) com sucesso, {} linha(s) ignorada(s).".format(
-            loaded_count, ignored_count), "success")
-
+        flash("Ficheiro carregado com sucesso.", "success")
         return redirect(url_for("portal"))
-
     return render_template("portal.html", page=Certificate.query.filter_by
                            (institution=current_user.institution).paginate(per_page=9), form=form)
 
@@ -104,16 +99,6 @@ def remove(id):
     return redirect(url_for("portal"))
 
 
-def _save_csv(form):
-    """ An utility function to save a file in the /tmp directory,
-    returning its path for further processing """
-    csv = form.csv.data
-    path = os.path.join(tempfile.gettempdir(),
-                        secure_filename(csv.filename))
-    csv.save(path)
-    return path
-
-
 @app.route("/login", methods=["GET", "POST"])
 def login():
     """ Login view """
@@ -123,7 +108,6 @@ def login():
         password = form.password.data
 
         user = User.query.filter_by(institution=institution).first()
-
         if user is None:
             flash("Credenciais inválidas.", "danger")
         else:
@@ -131,9 +115,6 @@ def login():
                 login_user(user)
                 flash("Entrou como {}.".format(
                     user.institution), "success")
-
-                forward = request.get_data()
-                print(forward)
                 return redirect(url_for("portal"))
             else:
                 flash("Credenciais inválidas.", "danger")
@@ -146,6 +127,7 @@ def password():
     """ Change password view """
     error = None
     form = PasswordChangeForm()
+
     if form.validate_on_submit():
         current_password = form.current_password.data
         new_password = form.new_password.data
@@ -184,7 +166,7 @@ def load_user(user_id):
 @app.errorhandler(500)
 def internal_server_error(e):
     import traceback
-    from utils import send_mail
+    from tools.mail import send_mail
 
     send_mail(traceback.format_exc())
     return jsonify("500 Internal Server Error, dyotamo has been reported.")

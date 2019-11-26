@@ -1,3 +1,3 @@
 from .user import LoginForm, PasswordChangeForm
-from .search import SearchForm
+from .validate import ValidateForm
 from .upload import UploadForm
