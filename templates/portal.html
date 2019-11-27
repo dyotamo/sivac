@@ -13,7 +13,7 @@
                 {{ render_field(form.csv, class="form-control-file") }}
             </div>
             <div class="form-group">
-                <input type="submit" class="btn btn-primary btn-block" value="Carregar">
+                <input type="submit" class="btn btn-primary btn-sm" value="Carregar">
             </div>
         </form>
 
@@ -36,7 +36,7 @@
                         <td>{{ certificate.owner }}</td>
                         <td>{{ certificate.issue_date.strftime("%d/%m/%Y") }}</td>
                         <td>
-                            <button type="button" class="btn btn-danger" data-toggle="modal"
+                            <button type="button" class="btn btn-danger btn-sm" data-toggle="modal"
                                 data-target="#modal{{ loop.index }}">
                                 Eliminar
                             </button>

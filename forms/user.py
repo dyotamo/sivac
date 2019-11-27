@@ -7,12 +7,14 @@ from .validate import CHOICES
 
 class LoginForm(FlaskForm):
     institution = SelectField('Instituição', choices=CHOICES)
-    password = PasswordField('Password', validators=[DataRequired()])
+    password = PasswordField('Password', validators=[
+                             DataRequired(message="Este campo é obrigatório.")])
 
 
 class PasswordChangeForm(FlaskForm):
     current_password = PasswordField(
-        'Password corrente', validators=[DataRequired()])
-    new_password = PasswordField('Password nova', validators=[DataRequired()])
+        'Password corrente', validators=[DataRequired(message="Este campo é obrigatório.")])
+    new_password = PasswordField('Password nova', validators=[
+                                 DataRequired(message="Este campo é obrigatório.")])
     confirm_new_password = PasswordField(
-        'Password nova', validators=[DataRequired()])
+        'Password nova', validators=[DataRequired(message="Este campo é obrigatório.")])

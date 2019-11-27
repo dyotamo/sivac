@@ -8,7 +8,8 @@ CHOICES = [("Universidade Zambeze", "Universidade Zambeze"),
 
 
 class ValidateForm(FlaskForm):
-    code = StringField("Código", validators=[DataRequired()])
+    code = StringField("Código", validators=[
+                       DataRequired(message="Este campo é obrigatório.")])
     issue_date = DateField("Data de Emissão", format="%d/%m/%Y",
-                           validators=[DataRequired()])
+                           validators=[DataRequired(message="Formato inválido. Use dd/mm/aaaa")])
     institution = SelectField("Instituição", choices=CHOICES)

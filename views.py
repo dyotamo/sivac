@@ -1,4 +1,6 @@
+from datetime import datetime
 from sivac import application, login_manager
+from sqlalchemy import text
 from flask import Flask, render_template, redirect, flash, jsonify, url_for
 from flask_login import LoginManager, login_required, login_user, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -43,8 +45,8 @@ def portal():
 
         flash("Ficheiro carregado com sucesso.", "success")
         return redirect(url_for("portal"))
-    return render_template("portal.html", page=Certificate.query.filter_by
-                           (institution=current_user.institution).paginate(per_page=9), form=form)
+    return render_template("portal.html", page=Certificate.query.order_by(text("id desc")).filter_by(
+        institution=current_user.institution).paginate(per_page=9), form=form)
 
 
 @application.route("/delete/<int:id>", methods=["POST"])
