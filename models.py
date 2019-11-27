@@ -24,3 +24,8 @@ class User(db.Model, UserMixin):
 
     def __repr__(self):
         return "<Institution %s>" % self.institution
+
+if __name__ == "__main__":
+    from sivac import application
+    with application.app_context():
+        db.create_all()

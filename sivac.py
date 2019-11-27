@@ -7,17 +7,17 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from forms import ValidateForm, LoginForm, UploadForm, PasswordChangeForm
 from models import db, Certificate, User
 
-app = Flask(__name__)
-app.config.from_object("config.BaseConfig")
+application = Flask(__name__)
+application.config.from_object("config.BaseConfig")
 
-db.init_app(app)
+db.init_app(application)
 
-login_manager = LoginManager(app)
+login_manager = LoginManager(application)
 login_manager.login_view = "login"
 login_manager.login_message = "Para aceder a esta funcionalidade, deve em primeiro lugar autenticar-se."
 login_manager.login_message_category = "warning"
 
-@app.route("/", methods=["GET", "POST"])
+@application.route("/", methods=["GET", "POST"])
 def index():
     """ Presentes a certificate validation form and validates certificates """
     form = ValidateForm()
@@ -39,15 +39,14 @@ def index():
     return render_template("index.html", form=form, error=error)
 
 
-@app.route("/portal", methods=["GET", "POST"])
+@application.route("/portal", methods=["GET", "POST"])
 @login_required
 def portal():
     """ Show all certificates that belongs to certain institution,
     and also makes possible to upload a .csv file containg new certificates """
     form = UploadForm()
     if form.validate_on_submit():
-        from seed import import_csv
-        from tools.file import save_csv
+        from tools.file import save_csv, import_csv
 
         path = save_csv(form)
         with open(path, "r") as f:
@@ -59,7 +58,7 @@ def portal():
                            (institution=current_user.institution).paginate(per_page=9), form=form)
 
 
-@app.route("/delete/<int:id>", methods=["POST"])
+@application.route("/delete/<int:id>", methods=["POST"])
 @login_required
 def remove(id):
     """ Remove a certificate """
@@ -72,7 +71,7 @@ def remove(id):
     return redirect(url_for("portal"))
 
 
-@app.route("/login", methods=["GET", "POST"])
+@application.route("/login", methods=["GET", "POST"])
 def login():
     """ Login view """
     form = LoginForm()
@@ -94,7 +93,7 @@ def login():
     return render_template("login.html", form=form)
 
 
-@app.route("/password", methods=["GET", "POST"])
+@application.route("/password", methods=["GET", "POST"])
 @login_required
 def password():
     """ Change password view """
@@ -120,7 +119,7 @@ def password():
     return render_template("password.html", form=form, error=error)
 
 
-@app.route("/logout", methods=["GET"])
+@application.route("/logout", methods=["GET"])
 @login_required
 def logout():
     """ Get out here """
@@ -136,7 +135,7 @@ def load_user(user_id):
 
 
 # HTTP Errors views
-@app.errorhandler(500)
+@application.errorhandler(500)
 def internal_server_error(e):
     import traceback
     from tools.mail import send_mail
@@ -145,15 +144,15 @@ def internal_server_error(e):
     return jsonify("500 Internal Server Error, dyotamo has been reported.")
 
 
-@app.errorhandler(404)
+@application.errorhandler(404)
 def page_not_found(e):
     return jsonify("404 Not Found.")
 
 
-@app.errorhandler(405)
+@application.errorhandler(405)
 def page_not_found(e):
     return jsonify("405 Method Not Allowed.")
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    application.run(debug=True)
