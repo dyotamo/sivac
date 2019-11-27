@@ -1,48 +1,21 @@
-import os
-import os.path
-import tempfile
-
 from datetime import datetime
-from flask import Flask, render_template, redirect, flash, jsonify, url_for, request
-from flask_sqlalchemy import SQLAlchemy
-from forms import ValidateForm, LoginForm, UploadForm, PasswordChangeForm
-from flask_login import LoginManager, UserMixin, login_required, login_user, logout_user, current_user
+
+from flask import Flask, render_template, redirect, flash, jsonify, url_for
+from flask_login import LoginManager, login_required, login_user, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask_minify import minify
+
+from forms import ValidateForm, LoginForm, UploadForm, PasswordChangeForm
+from models import db, Certificate, User
 
 app = Flask(__name__)
-db = SQLAlchemy(app)
-minify(app)
+app.config.from_object("config.BaseConfig")
+
+db.init_app(app)
 
 login_manager = LoginManager(app)
 login_manager.login_view = "login"
 login_manager.login_message = "Para aceder a esta funcionalidade, deve em primeiro lugar autenticar-se."
 login_manager.login_message_category = "warning"
-
-app.config.from_object("config.BaseConfig")
-
-
-class Certificate(db.Model):
-    """ Certificate model """
-    id = db.Column(db.Integer, primary_key=True)
-    code = db.Column(db.String(30), unique=True, nullable=False)
-    owner = db.Column(db.String(120), unique=False, nullable=False)
-    issue_date = db.Column(db.DateTime(), unique=False, nullable=False)
-    institution = db.Column(db.String(120), unique=False, nullable=False)
-
-    def __repr__(self):
-        return "<Certificate %s>" % self.code
-
-
-class User(db.Model, UserMixin):
-    """ User model """
-    id = db.Column(db.Integer, primary_key=True)
-    institution = db.Column(db.String(120), unique=True, nullable=False)
-    password = db.Column(db.String(255), unique=False, nullable=False)
-
-    def __repr__(self):
-        return "<Institution %s>" % self.institution
-
 
 @app.route("/", methods=["GET", "POST"])
 def index():
